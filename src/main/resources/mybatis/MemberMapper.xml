@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.atcrowdfunding.member.dao.MemberDao" >
+  
+  <update id="update">
+  	update t_member
+  	<set>
+  		<if test="authstatus!=null">
+	  		authstatus=#{authstatus},
+	  	</if>
+	  	<if test="accttype!=null">
+	  		accttype=#{accttype},
+	  	</if>
+	  	<if test="email!=null">
+	  		email=#{email},
+	  	</if>
+	  	<if test="realname!=null">
+	  		realname=#{realname},
+	  	</if>
+	  	<if test="cardnum!=null">
+			cardnum = #{cardnum},	  	
+	  	</if>
+	  	<if test="tel!=null">
+	  		tel = #{tel}
+	  	</if>
+  	</set>
+	where id = #{id}
+  </update>
+  
+  <update id="updateTicket">
+  	update t_ticket
+  	<set>
+	  	<if test="status!=null">
+	  		status=#{status},	
+	  	</if>
+	  	<if test="authcode!=null">
+	  		authcode=#{authcode},
+	  	</if>
+	  	<if test="pstep!=null">
+			pstep = #{pstep}	  	
+	  	</if>
+  	</set>
+  	where id = #{id}
+  </update>
+  
+  <select id="queryCert" resultType="com.atguigu.atcrowdfunding.common.bean.Cert">
+  	select id,name 
+  	from t_cert
+  	where id in (
+  		select certid from t_account_type_cert
+  		where accttype = #{accttype}
+  	)
+  	
+  </select>
+  <select id="queryMemberCert" resultType="com.atguigu.atcrowdfunding.common.bean.MemberCert">
+  	SELECT t_cert.* ,iconpath FROM t_member_cert,t_cert
+		WHERE t_member_cert.certid=t_cert.id
+		AND memberid = #{id}
+  </select>
+  
+  <delete id="deleteMemberCert" parameterType="com.atguigu.atcrowdfunding.common.bean.MemberCert">
+  	delete from t_member_cert where memberid = #{memberid}
+  </delete>
+  
+  <insert id="insertMemberCert">
+  	insert into t_member_cert(certid,memberid,iconpath)  values
+  	<foreach collection="mcs" item="mc" separator=",">
+  		(#{mc.certid},#{mc.memberid},#{mc.iconpath})
+  	</foreach>
+  </insert>
+  
+  <select id="queryTicket" resultType="com.atguigu.atcrowdfunding.common.bean.Ticket">
+  	select * from t_ticket where 
+  	<if test="id!=null">
+  		memberid = #{id}
+  		and status='0'
+  	</if>
+  	<if test="piid!=null">
+  		piid=#{piid}
+  	</if>
+  	 
+  </select>
+  
+  <insert id="insert" parameterType="com.atguigu.atcrowdfunding.common.bean.Member" >
+    insert into t_member (loginacct, userpswd, 
+      username, email, authstatus, 
+      usertype)
+    values ( #{loginacct,jdbcType=VARCHAR}, #{userpswd,jdbcType=CHAR}, 
+      #{username,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{authstatus,jdbcType=CHAR}, 
+      #{usertype,jdbcType=CHAR})
+  </insert>
+  
+</mapper>
